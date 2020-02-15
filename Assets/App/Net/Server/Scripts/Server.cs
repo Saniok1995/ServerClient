@@ -16,7 +16,7 @@ namespace App.Net
 
         public Server(int port) {
 
-            IPEndPoint tcpEndPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), port);
+            IPEndPoint tcpEndPoint = new IPEndPoint(IPAddress.Any, port);
             tcpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             tcpSocket.Bind(tcpEndPoint);
             tcpSocket.Listen(10);

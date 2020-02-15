@@ -11,4 +11,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/App/RoomServer/RoomServer.unity
     guid: 39e881b97472c0d4f8ff25a3389c47ca
+  - enabled: 1
+    path: Assets/App/RoomClient/RoomClient.unity
+    guid: bacfeb99710614e4cb82a0807a288317
   m_configObjects: {}

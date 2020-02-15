@@ -10,7 +10,8 @@ namespace App.RoomServer
 {
     public class SceneController : MonoBehaviour
     {
-        public Text text; 
+        public Text text;
+        public string bufferText;
 
         private void Start()
         {
@@ -24,7 +25,12 @@ namespace App.RoomServer
         }
 
         void listenServer(string message) {
-            Debug.Log(message);            
+            bufferText = message;            
+        }
+
+        private void Update()
+        {
+            text.text = bufferText;
         }
     }
 }

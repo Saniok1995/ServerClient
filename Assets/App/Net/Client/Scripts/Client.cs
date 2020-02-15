@@ -13,18 +13,31 @@ namespace App.Net
         Socket tcpSocket;
         IPEndPoint tcpEndPoint;
 
+        string connectIp;
+        int port;
+
         public Client(string connectIp, int port)
         {
-            tcpEndPoint = new IPEndPoint(IPAddress.Parse(connectIp), port);
-            tcpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            tcpSocket.Bind(tcpEndPoint);
-            tcpSocket.Listen(10);
+            this.connectIp = connectIp;
+            this.port = port;
         }
 
-        public void SendMessage(string message) {
+        public void SendMessage(string message)
+        {
+            ConnectServer();
+
             var data = Encoding.UTF8.GetBytes(message);
             tcpSocket.Connect(tcpEndPoint);
             tcpSocket.Send(data);
+
+            tcpSocket.Shutdown(SocketShutdown.Both);
+            tcpSocket.Close();
+        }
+
+        void ConnectServer()
+        {
+            tcpEndPoint = new IPEndPoint(IPAddress.Parse(connectIp), port);
+            tcpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
         }
     }
 }
