@@ -38,7 +38,9 @@ namespace App.Net
 
                 } while (listener.Available > 0);
 
-                ReceivedData?.Invoke(data.ToString());                               
+                ReceivedData?.Invoke(data.ToString());
+
+                listener.Send(Encoding.UTF8.GetBytes("ok"));
 
                 listener.Shutdown(SocketShutdown.Both);
                 listener.Close();

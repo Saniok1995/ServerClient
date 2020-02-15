@@ -24,7 +24,7 @@ namespace App.RoomServer
         }
 
         void listenServer(string message) {
-            text.text = message;            
+            Debug.Log(message);            
         }
     }
 }
