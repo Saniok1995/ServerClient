@@ -5,17 +5,17 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System;
+using UniRx;
+using App.RoomServer;
 
 namespace App.Net
 {
 
-    public class Server
+    public class Server<T>
     {
         Socket tcpSocket;
-        public Action<string> ReceivedData;
 
-        public Server(int port) {
-
+        public Server(int port) {            
             IPEndPoint tcpEndPoint = new IPEndPoint(IPAddress.Any, port);
             tcpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             tcpSocket.Bind(tcpEndPoint);
@@ -38,13 +38,28 @@ namespace App.Net
 
                 } while (listener.Available > 0);
 
-                ReceivedData?.Invoke(data.ToString());
-
-                listener.Send(Encoding.UTF8.GetBytes("ok"));
+                HandleRequest(data.ToString(), listener);
 
                 listener.Shutdown(SocketShutdown.Both);
                 listener.Close();
             }
         }
+
+        void HandleRequest(string message, Socket listener) {
+            if (message.ToString() != StandardMessages.TestQuery)
+            {
+                var data = JsonUtility.FromJson<T>(message.ToString());
+                MessageBroker.Default.Publish(data);
+            }
+            else
+            {
+                listener.Send(Encoding.UTF8.GetBytes(StandardMessages.Сonfirmation));
+            }
+        }
     }
+
+    public class StandardMessages {
+        public const string TestQuery = "test query";
+        public const string Сonfirmation = "got data";
+    }    
 }

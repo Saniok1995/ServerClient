@@ -20,18 +20,50 @@ namespace App.Net
         {
             this.connectIp = connectIp;
             this.port = port;
-        }
+        }        
 
-        public void SendMessage(string message)
+        public void SendMessage<T>(T sentData)
         {
             ConnectServer();
-
-            var data = Encoding.UTF8.GetBytes(message);
+            
+            var data = Encoding.UTF8.GetBytes(JsonUtility.ToJson(sentData));
             tcpSocket.Connect(tcpEndPoint);
             tcpSocket.Send(data);
 
             tcpSocket.Shutdown(SocketShutdown.Both);
             tcpSocket.Close();
+        }
+
+        public bool CheckConnect()
+        {
+            try
+            {
+                ConnectServer();
+                var data = Encoding.UTF8.GetBytes(StandardMessages.TestQuery);
+                tcpSocket.Connect(tcpEndPoint);
+                tcpSocket.Send(data);
+
+                byte[] buffer = new byte[256];
+                int size = 0;
+                StringBuilder answer = new StringBuilder();
+                do
+                {
+                    size = tcpSocket.Receive(buffer);
+                    answer.Append(Encoding.UTF8.GetString(buffer, 0, size));
+
+                } while (tcpSocket.Available > 0);
+                tcpSocket.Shutdown(SocketShutdown.Both);
+
+                return answer.ToString() == StandardMessages.Сonfirmation;
+            }
+            catch (SocketException exception)
+            {
+                Debug.Log(exception.Message);
+                return false;
+            }
+            finally {                
+                tcpSocket.Close();
+            }
         }
 
         void ConnectServer()

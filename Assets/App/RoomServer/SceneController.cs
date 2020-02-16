@@ -1,10 +1,12 @@
-﻿using System.Collections;
+﻿using App.Net;
+using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
-using App.Net;
-using UnityEngine.UI;
 using System.Threading;
 using System.Threading.Tasks;
+using UnityEngine;
+using UnityEngine.UI;
+using UniRx;
+using App.Common;
 
 namespace App.RoomServer
 {
@@ -15,22 +17,20 @@ namespace App.RoomServer
 
         private void Start()
         {
-            Server server = new Server(8080);
-            server.ReceivedData = listenServer;
+            var server = new Server<MessageData>(8080);
             Task task = new Task(() =>
             {
                 server.Start();
             });
-            task.Start();            
+            task.Start();
+
+            MessageBroker.Default.Receive<MessageData>().ObserveOnMainThread()
+                .Subscribe(data => HandleReceivedMessage(data));
         }
 
-        void listenServer(string message) {
-            bufferText = message;            
-        }
-
-        private void Update()
+        void HandleReceivedMessage(MessageData data)
         {
-            text.text = bufferText;
-        }
-    }
+            text.text = data.message;
+        }       
+    }    
 }
