@@ -13,7 +13,6 @@ namespace App.RoomServer
     public class SceneController : MonoBehaviour
     {
         public Text text;
-        public string bufferText;
 
         private void Start()
         {

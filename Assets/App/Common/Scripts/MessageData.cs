@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace App.Common
 {
-    public class MessageData : MonoBehaviour
+    public class MessageData
     {
         public string message;
 

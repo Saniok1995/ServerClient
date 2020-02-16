@@ -45,10 +45,10 @@ namespace App.Net
             }
         }
 
-        void HandleRequest(string message, Socket listener) {
+        void HandleRequest(string message, Socket listener) {            
             if (message.ToString() != StandardMessages.TestQuery)
             {
-                var data = JsonUtility.FromJson<T>(message.ToString());
+                var data = JsonUtility.FromJson<T>(message.ToString());                
                 MessageBroker.Default.Publish(data);
             }
             else
