@@ -7,10 +7,11 @@ using System.Text;
 using System;
 using UniRx;
 using App.RoomServer;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace App.Net
 {
-
     public class Server<T>
     {
         Socket tcpSocket;
@@ -19,47 +20,51 @@ namespace App.Net
             IPEndPoint tcpEndPoint = new IPEndPoint(IPAddress.Any, port);
             tcpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             tcpSocket.Bind(tcpEndPoint);
-            tcpSocket.Listen(10);
+            tcpSocket.Listen(10);            
         }
 
-        public void Start() {
-            
+        public void Start() {            
             while (true)
             {                
                 Socket listener = tcpSocket.Accept();
+                ThreadPool.QueueUserWorkItem((obj)=> { HandleListener(listener); });
+                }
+        }
 
-                byte[] buffer = new byte[256];
-                int size = 0;
-                StringBuilder data = new StringBuilder();
-                do
-                {
-                    size = listener.Receive(buffer);
-                    data.Append(Encoding.UTF8.GetString(buffer, 0, size));
+        void HandleListener(Socket listener) {
+            byte[] buffer = new byte[256];
+            int size = 0;
+            StringBuilder data = new StringBuilder();
+            do
+            {
+                size = listener.Receive(buffer);
+                data.Append(Encoding.UTF8.GetString(buffer, 0, size));
 
-                } while (listener.Available > 0);
+            } while (listener.Available > 0);
 
-                HandleRequest(data.ToString(), listener);
+            HandleRequest(data.ToString(), listener);
 
-                listener.Shutdown(SocketShutdown.Both);
-                listener.Close();
-            }
+            listener.Shutdown(SocketShutdown.Both);
+            listener.Close();
         }
 
         void HandleRequest(string message, Socket listener) {            
             if (message.ToString() != StandardMessages.TestQuery)
             {
-                var data = JsonUtility.FromJson<T>(message.ToString());                
+                var data = JsonUtility.FromJson<T>(message.ToString());
+                listener.Send(Encoding.UTF8.GetBytes(StandardMessages.Сonfirmation));
                 MessageBroker.Default.Publish(data);
             }
             else
             {
-                listener.Send(Encoding.UTF8.GetBytes(StandardMessages.Сonfirmation));
+                listener.Send(Encoding.UTF8.GetBytes(StandardMessages.ConnectIsActive));
             }
         }
     }
 
     public class StandardMessages {
-        public const string TestQuery = "test query";
-        public const string Сonfirmation = "got data";
+        public const string TestQuery = "test";
+        public const string ConnectIsActive = "active";
+        public const string Сonfirmation = "processed";
     }    
 }

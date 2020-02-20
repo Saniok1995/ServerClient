@@ -10,6 +10,7 @@ using UniRx.Operators;
 using UnityEngine;
 using UnityEngine.UI;
 
+
 namespace App.RoomClient
 {
     public class SceneController : MonoBehaviour
@@ -22,35 +23,62 @@ namespace App.RoomClient
         [SerializeField] Color badColor;
 
         [Header("UI Controll Panel")]
-        [SerializeField] Text inputField;
         [SerializeField] Image panelControll;
+        [SerializeField] Button buttonLight;
 
         [Header("Loading window")]
         [SerializeField] GameObject loadingWindow;
 
         Client client;
 
-        private void Start()
-        {
-
-        }
-
         public void OnClickConnect()
         {
             client = new Client(ipConnection.text, Convert.ToInt32(port.text));
             loadingWindow.SetActive(true);
             Observable.Start(() => client.CheckConnect()).ObserveOnMainThread()
-                .Subscribe(HandlerConnect);
+                .Subscribe(HandleConnect);
         }
 
-        public void OnClickSendMessage()
+        public void OnClickToggleLight()
         {
-            string message = inputField.text;
-            if (message.Length > 0)
-            {
+            SendMessage(new MessageData(TypeCommand.ToggleLight));
+        }
+
+        public void OnClickBoom()
+        {
+            SendMessage(new MessageData(TypeCommand.Boom));
+        }
+
+        void SendMessage(MessageData message)
+        {
+            Debug.Log(message.GetCommand());
                 loadingWindow.SetActive(true);
-                Observable.Start(() => client?.SendMessage(new MessageData(message))).ObserveOnMainThread()
-                    .Subscribe(x => loadingWindow.SetActive(false));
+                Observable.Start(() => client.SendMessage(message)).ObserveOnMainThread()
+                    .Subscribe(HandleSend);            
+        }
+
+        void HandleSend(bool result)
+        {            
+            loadingWindow.SetActive(false);
+            if (result == false)
+            {                
+                SetStatePanel(panelControll, false).
+                    Append(SetStatePanel(panelParametersConnect, true));
+            }
+        }
+
+        void HandleConnect(bool result)
+        {
+            loadingWindow.SetActive(false);
+            if (result)
+            {
+                SetStatePanel(panelParametersConnect, false).
+                    Append(SetStatePanel(panelControll, true));
+            }
+            else
+            {
+                ipConnection.text = ""; port.text = "";
+                AnimBadConnection();
             }
         }
 
@@ -71,20 +99,5 @@ namespace App.RoomClient
             return anim;
         }
         #endregion
-
-        void HandlerConnect(bool result)
-        {
-            loadingWindow.SetActive(false);
-            if (result)
-            {
-                SetStatePanel(panelParametersConnect, false).
-                    Append(SetStatePanel(panelControll, true));
-            }
-            else
-            {
-                ipConnection.text = ""; port.text = "";
-                AnimBadConnection();
-            }
-        }
     }
 }
