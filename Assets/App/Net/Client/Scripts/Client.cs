@@ -32,9 +32,8 @@ namespace App.Net
             {
                 tcpSocket.Connect(tcpEndPoint);
                 tcpSocket.Send(data);
-                string answer = GetAnswer();
                 tcpSocket.Shutdown(SocketShutdown.Both);
-                return answer == StandardMessages.Сonfirmation;
+                return true;
             }
             catch (SocketException exception)
             {
@@ -59,7 +58,7 @@ namespace App.Net
                 string answer = GetAnswer();
                 tcpSocket.Shutdown(SocketShutdown.Both);
 
-                return answer.ToString() == StandardMessages.ConnectIsActive;
+                return answer.ToString() == StandardMessages.Сonfirmation;
             }
             catch (SocketException exception)
             {

@@ -51,20 +51,18 @@ namespace App.Net
         void HandleRequest(string message, Socket listener) {            
             if (message.ToString() != StandardMessages.TestQuery)
             {
-                var data = JsonUtility.FromJson<T>(message.ToString());
-                listener.Send(Encoding.UTF8.GetBytes(StandardMessages.Сonfirmation));
+                var data = JsonUtility.FromJson<T>(message.ToString());            
                 MessageBroker.Default.Publish(data);
             }
             else
             {
-                listener.Send(Encoding.UTF8.GetBytes(StandardMessages.ConnectIsActive));
+                listener.Send(Encoding.UTF8.GetBytes(StandardMessages.Сonfirmation));
             }
         }
     }
 
     public class StandardMessages {
         public const string TestQuery = "test";
-        public const string ConnectIsActive = "active";
         public const string Сonfirmation = "processed";
     }    
 }

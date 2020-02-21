@@ -17,11 +17,10 @@ namespace App.Common
         public TypeCommand GetCommand() {
             return (TypeCommand)command;
         }
-
     }
 
     public enum TypeCommand
     {
-        Non, ToggleLight, Boom
+        Non, OnLight, OffLight, Boom
     }
 }

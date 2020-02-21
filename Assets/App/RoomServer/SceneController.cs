@@ -1,11 +1,8 @@
 ﻿using App.Common;
 using App.Net;
+using DG.Tweening;
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Net;
 using System.Net.Sockets;
-using System.Threading;
 using System.Threading.Tasks;
 using UniRx;
 using UnityEngine;
@@ -15,37 +12,48 @@ namespace App.RoomServer
 {
     public class SceneController : MonoBehaviour
     {
-        public Text text;
+        [Header("Links UI")]
+        [SerializeField] InputField enteredPort;
+        [SerializeField] CanvasGroup parametersPanel;
 
-        private void Awake()
-        {
-            StartReceiveMessage();
-        }
+        [Header("Links Game Objects")]
+        [SerializeField] ParticleSystem bomb;
+        [SerializeField] Light[] lights;
 
-        private void Start()
+        string wrongPortMessage = "Wrong Port";
+
+        public void OnClickStartServer()
         {
-            CreateServer(8080);
+            int port = Convert.ToInt32(enteredPort.text);
+            if (port > 1023 || port < 49151)
+            {
+                try
+                {
+                    CreateServer(port);
+                    StartReceiveMessage();
+                    HideControllPanel();
+                }
+                catch (SocketException exception)
+                {
+                    Debug.Log(exception.Message);
+                    enteredPort.text = String.Empty;
+                }
+            }
+            else
+            {
+                enteredPort.text = wrongPortMessage;
+            }
         }
 
         void CreateServer(int port)
         {
             Server<MessageData> server = null;
-            try
+            server = new Server<MessageData>(port);
+            Task task = new Task(() =>
             {
-                server = new Server<MessageData>(port);
-            }
-            catch (SocketException exception)
-            {
-                Debug.Log(exception.Message);
-            }
-            if (server != null)
-            {
-                Task task = new Task(() =>
-                {
-                    server.Start();
-                });
-                task.Start();
-            }
+                server.Start();
+            });
+            task.Start();
         }
 
         void StartReceiveMessage()
@@ -56,7 +64,30 @@ namespace App.RoomServer
 
         void HandleReceivedMessage(MessageData data)
         {
-            text.text = data.GetCommand().ToString();
+            switch (data.GetCommand())
+            {
+                case TypeCommand.OnLight:
+                    foreach (Light light in lights)
+                    {
+                        light.enabled = true;
+                    }
+                    break;
+                case TypeCommand.OffLight:
+                    foreach (Light light in lights)
+                    {
+                        light.enabled = false;
+                    }
+                    break;
+                case TypeCommand.Boom:
+                    bomb.Play();
+                    break;
+                default: break;
+            }
+        }
+
+        Tween HideControllPanel()
+        {
+            return parametersPanel.DOFade(0f, 0.5f);
         }
     }
 }

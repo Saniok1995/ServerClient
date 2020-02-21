@@ -39,9 +39,14 @@ namespace App.RoomClient
                 .Subscribe(HandleConnect);
         }
 
-        public void OnClickToggleLight()
+        public void OnClickOnLight()
         {
-            SendMessage(new MessageData(TypeCommand.ToggleLight));
+            SendMessage(new MessageData(TypeCommand.OnLight));
+        }
+
+        public void OnClickOffLight()
+        {
+            SendMessage(new MessageData(TypeCommand.OffLight));
         }
 
         public void OnClickBoom()
