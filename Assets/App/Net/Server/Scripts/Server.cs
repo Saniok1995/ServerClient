@@ -1,14 +1,14 @@
-﻿using System.Collections;
+﻿using App.RoomServer;
+using System;
+using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using System;
-using UniRx;
-using App.RoomServer;
-using System.Threading.Tasks;
 using System.Threading;
+using System.Threading.Tasks;
+using UniRx;
+using UnityEngine;
 
 namespace App.Net
 {
@@ -16,22 +16,25 @@ namespace App.Net
     {
         Socket tcpSocket;
 
-        public Server(int port) {            
+        public Server(int port)
+        {
             IPEndPoint tcpEndPoint = new IPEndPoint(IPAddress.Any, port);
             tcpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             tcpSocket.Bind(tcpEndPoint);
-            tcpSocket.Listen(10);            
+            tcpSocket.Listen(10);
         }
 
-        public void Start() {            
+        public void Start()
+        {
             while (true)
-            {                
+            {
                 Socket listener = tcpSocket.Accept();
-                ThreadPool.QueueUserWorkItem((obj)=> { HandleListener(listener); });
-                }
+                ThreadPool.QueueUserWorkItem((obj) => { HandleListener(listener); });
+            }
         }
 
-        void HandleListener(Socket listener) {
+        void HandleListener(Socket listener)
+        {
             byte[] buffer = new byte[256];
             int size = 0;
             StringBuilder data = new StringBuilder();
@@ -48,10 +51,11 @@ namespace App.Net
             listener.Close();
         }
 
-        void HandleRequest(string message, Socket listener) {            
+        void HandleRequest(string message, Socket listener)
+        {
             if (message.ToString() != StandardMessages.TestQuery)
             {
-                var data = JsonUtility.FromJson<T>(message.ToString());            
+                var data = JsonUtility.FromJson<T>(message.ToString());
                 MessageBroker.Default.Publish(data);
             }
             else
@@ -61,8 +65,9 @@ namespace App.Net
         }
     }
 
-    public class StandardMessages {
+    public class StandardMessages
+    {
         public const string TestQuery = "test";
         public const string Сonfirmation = "processed";
-    }    
+    }
 }

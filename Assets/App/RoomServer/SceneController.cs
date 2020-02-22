@@ -2,11 +2,13 @@
 using App.Net;
 using DG.Tweening;
 using System;
+using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Linq;
 
 namespace App.RoomServer
 {
@@ -18,7 +20,7 @@ namespace App.RoomServer
 
         [Header("Links Game Objects")]
         [SerializeField] ParticleSystem bomb;
-        [SerializeField] Light[] lights;
+        [SerializeField] List<Light> lights;
 
         string wrongPortMessage = "Wrong Port";
 
@@ -67,16 +69,10 @@ namespace App.RoomServer
             switch (data.GetCommand())
             {
                 case TypeCommand.OnLight:
-                    foreach (Light light in lights)
-                    {
-                        light.enabled = true;
-                    }
+                    lights.ForEach((light) => { light.enabled = true; });                    
                     break;
                 case TypeCommand.OffLight:
-                    foreach (Light light in lights)
-                    {
-                        light.enabled = false;
-                    }
+                    lights.ForEach((light) => { light.enabled = false; });
                     break;
                 case TypeCommand.Boom:
                     bomb.Play();
